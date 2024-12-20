@@ -1,0 +1,114 @@
+{% extends 'amazon_backend/base.html' %}
+
+{% block title %}{{ product.product_name }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <img src="{{ product.img_link }}" alt="{{ product.product_name }}" 
+             class="img-fluid mb-3">
+        <div class="d-grid gap-2">
+            <button class="btn btn-primary add-to-cart" 
+                    data-product-id="{{ product.product_id }}">
+                Add to Cart
+            </button>
+            <button class="btn btn-outline-primary add-to-wishlist" 
+                    data-product-id="{{ product.product_id }}">
+                Add to Wishlist
+            </button>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <h1>{{ product.product_name }}</h1>
+        
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Product Details</h5>
+                <p class="card-text">
+                    <strong>Price:</strong> {{ product.discounted_price }}<br>
+                    <strong>Original Price:</strong> {{ product.actual_price }}<br>
+                    <strong>Discount:</strong> {{ product.discount_percentage }}%<br>
+                    <strong>Rating:</strong> {{ product.rating }} ({{ product.rating_count }} reviews)<br>
+                    <strong>Category:</strong> {{ product.category }}<br>
+                    <strong>Available Quantity:</strong> {{ product.available_quantity }}
+                </p>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">About Product</h5>
+                <p class="card-text">{{ product.about_product }}</p>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Sold by</h5>
+                <p class="card-text">
+                    {% if vendor %}
+                        <a href="{% url 'amazon_backend:vendor_store' vendor_id=vendor.vendor_id %}">
+                            {{ vendor.vendor_name }}
+                        </a><br>
+                        <small class="text-muted">Contact: {{ vendor.vendor_contact }}</small>
+                    {% else %}
+                        <span class="text-muted">Vendor information not available</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h2 class="mt-4">Reviews</h2>
+<div class="row">
+    {% for review in reviews %}
+    <div class="col-md-6 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{ review.review_title }}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">
+                    By {{ review.user_name }} on {{ review.review_date }}
+                </h6>
+                <p class="card-text">{{ review.review_content }}</p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<a href="{% url 'amazon_backend:product_list' %}" class="btn btn-primary mt-3">
+    Back to Products
+</a>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Add CSRF token to all AJAX requests
+    $.ajaxSetup({
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    });
+
+    $('.add-to-cart').click(function() {
+        const productId = $(this).data('product-id');
+        $.post(`/cart/add/${productId}/`, function(data) {
+            if (data.status === 'success') {
+                alert('Added to cart!');
+            }
+        });
+    });
+
+    $('.add-to-wishlist').click(function() {
+        const productId = $(this).data('product-id');
+        $.post(`/wishlist/add/${productId}/`, function(data) {
+            if (data.status === 'success') {
+                alert('Added to wishlist!');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

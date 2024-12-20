@@ -1,0 +1,72 @@
+{% extends 'amazon_backend/base.html' %}
+
+{% block title %}Wishlist{% endblock %}
+
+{% block content %}
+<h1>My Wishlist</h1>
+
+{% if wishlist_items %}
+    <div class="row">
+        {% for item in wishlist_items %}
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ item.product_name }}</h5>
+                    <p class="card-text">Price: ${{ item.price }}</p>
+                    <button class="btn btn-danger btn-sm remove-from-wishlist" 
+                            data-product-id="{{ item.product_id }}">
+                        Remove
+                    </button>
+                    <button class="btn btn-primary btn-sm add-to-cart" 
+                            data-product-id="{{ item.product_id }}">
+                        Add to Cart
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+    $(document).ready(function() {
+        // Add CSRF token to all AJAX requests
+        $.ajaxSetup({
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        });
+
+        $('.remove-from-wishlist').click(function() {
+            const productId = $(this).data('product-id');
+            const card = $(this).closest('.col-md-4');
+            $.post(`/wishlist/remove/${productId}/`, function(data) {
+                if (data.status === 'success') {
+                    card.remove();
+                    if ($('.card').length === 0) {
+                        location.reload();
+                    }
+                }
+            });
+        });
+
+        $('.add-to-cart').click(function() {
+            const productId = $(this).data('product-id');
+            const button = $(this);
+            $.post(`/cart/add/${productId}/`, function(data) {
+                if (data.status === 'success') {
+                    alert('Added to cart!');
+                    // Optionally disable the button or change its text
+                    button.prop('disabled', true).text('Added to Cart');
+                }
+            });
+        });
+    });
+    </script>
+{% else %}
+    <p>Your wishlist is empty.</p>
+{% endif %}
+
+<a href="{% url 'amazon_backend:product_list' %}" class="btn btn-primary">
+    Continue Shopping
+</a>
+{% endblock %}

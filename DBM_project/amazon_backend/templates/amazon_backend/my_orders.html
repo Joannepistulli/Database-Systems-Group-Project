@@ -1,0 +1,42 @@
+{% extends 'amazon_backend/base.html' %}
+
+{% block title %}My Orders{% endblock %}
+
+{% block content %}
+<h2>My Orders</h2>
+
+{% if orders %}
+    <div class="row">
+        {% for order in orders %}
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Order #{{ order.order_id }}</h5>
+                    <p class="card-text">
+                        <strong>Date:</strong> {{ order.created_at|date }}<br>
+                        <strong>Total:</strong> ${{ order.total_amount }}<br>
+                        <strong>Status:</strong> {{ order.status|title }}
+                    </p>
+                    <h6>Items:</h6>
+                    <ul>
+                        {% for item in order.items.all %}
+                        <li>{{ item.quantity }}x {{ item.product_name }} - ${{ item.price }}</li>
+                        {% endfor %}
+                    </ul>
+                    <h6>Shipping Address:</h6>
+                    <p>
+                        {{ order.full_name }}<br>
+                        {{ order.address }}<br>
+                        {{ order.city }}, {{ order.state }} {{ order.zip_code }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p>You haven't placed any orders yet.</p>
+{% endif %}
+
+<a href="{% url 'amazon_backend:product_list' %}" class="btn btn-primary">Continue Shopping</a>
+{% endblock %}
