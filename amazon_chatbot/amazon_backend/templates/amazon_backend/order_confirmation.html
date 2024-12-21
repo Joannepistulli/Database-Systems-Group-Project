@@ -1,0 +1,39 @@
+{% extends 'amazon_backend/base.html' %}
+
+{% block title %}Order Confirmation{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="alert alert-success" role="alert">
+        <h4 class="alert-heading">Thank you for your order!</h4>
+        <p>Your order has been successfully placed.</p>
+        <hr>
+        <p class="mb-0">Order ID: {{ order.order_id }}</p>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Order Details</h5>
+            <p class="card-text">
+                <strong>Date:</strong> {{ order.created_at|date }}<br>
+                <strong>Total Amount:</strong> ${{ order.total_amount }}<br>
+                <strong>Status:</strong> {{ order.status|title }}
+            </p>
+            
+            <h6>Delivery Information</h6>
+            <p>
+                {{ order.full_name }}<br>
+                {{ order.address }}<br>
+                {{ order.city }}, {{ order.state }} {{ order.zip_code }}<br>
+                Email: {{ order.email }}<br>
+                Phone: {{ order.phone }}
+            </p>
+        </div>
+    </div>
+    
+    <div class="mt-3">
+        <a href="{% url 'amazon_backend:product_list' %}" class="btn btn-primary">Continue Shopping</a>
+        <a href="{% url 'amazon_backend:my_orders' %}" class="btn btn-secondary">View All Orders</a>
+    </div>
+</div>
+{% endblock %}

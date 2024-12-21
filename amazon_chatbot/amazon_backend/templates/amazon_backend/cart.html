@@ -1,0 +1,125 @@
+{% extends 'amazon_backend/base.html' %}
+
+{% block title %}Cart{% endblock %}
+
+{% block content %}
+<h1>Shopping Cart</h1>
+
+{% if cart_items %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Total</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in cart_items %}
+            <tr>
+                <td>{{ item.product_name }}</td>
+                <td>${{ item.price }}</td>
+                <td>
+                    <div class="input-group" style="max-width: 150px;">
+                        <button class="btn btn-outline-secondary decrease-quantity" 
+                                data-product-id="{{ item.product_id }}">-</button>
+                        <input type="number" class="form-control text-center quantity-input" 
+                               value="{{ item.quantity }}" min="1" 
+                               data-product-id="{{ item.product_id }}">
+                        <button class="btn btn-outline-secondary increase-quantity"
+                                data-product-id="{{ item.product_id }}">+</button>
+                    </div>
+                </td>
+                <td>${{ item.line_total }}</td>
+                <td>
+                    <button class="btn btn-danger btn-sm remove-from-cart" 
+                            data-product-id="{{ item.product_id }}">
+                        Remove
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                <td><strong>${{ total }}</strong></td>
+                <td></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <script>
+    $(document).ready(function() {
+        $.ajaxSetup({
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        });
+
+        function updateQuantity(productId, newQuantity) {
+            $.post(`/cart/update/${productId}/`, {
+                quantity: newQuantity
+            }, function(data) {
+                if (data.status === 'success') {
+                    location.reload(); // Refresh to update totals
+                }
+            });
+        }
+
+        $('.decrease-quantity').click(function() {
+            const productId = $(this).data('product-id');
+            const input = $(this).siblings('.quantity-input');
+            const currentValue = parseInt(input.val());
+            if (currentValue > 1) {
+                updateQuantity(productId, currentValue - 1);
+            }
+        });
+
+        $('.increase-quantity').click(function() {
+            const productId = $(this).data('product-id');
+            const input = $(this).siblings('.quantity-input');
+            const currentValue = parseInt(input.val());
+            updateQuantity(productId, currentValue + 1);
+        });
+
+        $('.quantity-input').change(function() {
+            const productId = $(this).data('product-id');
+            const newValue = parseInt($(this).val());
+            if (newValue >= 1) {
+                updateQuantity(productId, newValue);
+            } else {
+                $(this).val(1);
+            }
+        });
+
+        $('.remove-from-cart').click(function() {
+            const productId = $(this).data('product-id');
+            const row = $(this).closest('tr');
+            $.post(`/cart/remove/${productId}/`, function(data) {
+                if (data.status === 'success') {
+                    row.remove();
+                    if ($('tbody tr').length === 0) {
+                        location.reload();
+                    }
+                }
+            });
+        });
+    });
+    </script>
+{% else %}
+    <p>Your cart is empty.</p>
+{% endif %}
+
+{% if cart_items %}
+    <a href="{% url 'amazon_backend:checkout' %}" class="btn btn-success me-2">
+        Proceed to Checkout
+    </a>
+{% endif %}
+
+<a href="{% url 'amazon_backend:product_list' %}" class="btn btn-primary">
+    Continue Shopping
+</a>
+{% endblock %}

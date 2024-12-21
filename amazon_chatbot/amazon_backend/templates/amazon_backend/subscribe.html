@@ -1,0 +1,58 @@
+{% extends 'amazon_backend/base.html' %}
+
+{% block title %}Subscribe to VIP Service{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4>{% if is_resubscribe %}Resubscribe to{% else %}Subscribe to{% endif %} VIP Service</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <h5 class="mb-3">Payment Information</h5>
+                    <div class="mb-3">
+                        <label for="card_number" class="form-label">Card Number</label>
+                        <input type="text" class="form-control" id="card_number" name="card_number" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="card_expiry" class="form-label">Card Expiry (MM/YY)</label>
+                        <input type="text" class="form-control" id="card_expiry" name="card_expiry" 
+                               placeholder="MM/YY" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="card_cvv" class="form-label">CVV</label>
+                        <input type="text" class="form-control" id="card_cvv" name="card_cvv" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        {% if is_resubscribe %}Resubscribe Now{% else %}Subscribe Now{% endif %}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h4>VIP Benefits</h4>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    {% for benefit in benefits %}
+                    <li class="mb-2">
+                        <h6>{{ benefit.title }}</h6>
+                        <p class="text-muted">{{ benefit.description }}</p>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

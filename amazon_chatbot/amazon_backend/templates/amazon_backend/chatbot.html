@@ -1,0 +1,115 @@
+{% extends 'amazon_backend/base.html' %}
+
+{% block title %}Chatbot{% endblock %}
+
+{% block content %}
+<h1>Chatbot</h1>
+
+<div id="chat-container" class="border p-3" style="height: 400px; overflow-y: auto;">
+    <!-- Chat messages will appear here -->
+</div>
+
+<div class="input-group mt-3">
+    <input type="text" id="user-message" class="form-control" placeholder="Type your message...">
+    <button class="btn btn-primary" id="send-message">Send</button>
+</div>
+
+{#<script>#}
+{#    $(document).ready(function() {#}
+{#        // CSRF token setup for AJAX#}
+{#        $.ajaxSetup({#}
+{#            headers: {#}
+{#                'X-CSRFToken': '{{ csrf_token }}'#}
+{#            }#}
+{#        });#}
+{##}
+{#        // Function to append messages to chat container#}
+{#        function appendMessage(role, message) {#}
+{#            const messageClass = role === 'user' ? 'text-end text-primary' : 'text-start text-success';#}
+{#            $('#chat-container').append(#}
+{#                `<div class="${messageClass}"><strong>${role === 'user' ? 'You' : 'Bot'}:</strong> ${message}</div>`#}
+{#            );#}
+{#            $('#chat-container').scrollTop($('#chat-container')[0].scrollHeight);#}
+{#        }#}
+{##}
+{#        // Event listener for send button#}
+{#        $('#send-message').click(function() {#}
+{#            const userMessage = $('#user-message').val().trim();#}
+{#            if (!userMessage) {#}
+{#                return; // Don't send empty messages#}
+{#            }#}
+{##}
+{#            appendMessage('user', userMessage);#}
+{#            $('#user-message').val(''); // Clear input#}
+{##}
+{#            // Send user message to the chatbot backend#}
+{#            $.post('/chatbot/', { message: userMessage }, function(data) {#}
+{#                if (data.reply) {#}
+{#                    appendMessage('bot', data.reply);#}
+{#                } else if (data.error) {#}
+{#                    appendMessage('bot', `Error: ${data.error}`);#}
+{#                }#}
+{#            }).fail(function() {#}
+{#                appendMessage('bot', 'An error occurred. Please try again.');#}
+{#            });#}
+{#        });#}
+{##}
+{#        // Allow pressing "Enter" to send message#}
+{#        $('#user-message').keypress(function(event) {#}
+{#            if (event.which === 13) { // Enter key#}
+{#                $('#send-message').click();#}
+{#            }#}
+{#        });#}
+{#    });#}
+{#</script>#}
+    <script>
+    $(document).ready(function() {
+        // Function to append messages to chat container
+        function appendMessage(role, message) {
+            const messageClass = role === 'user' ? 'text-end text-primary' : 'text-start text-success';
+            $('#chat-container').append(
+                `<div class="${messageClass}"><strong>${role === 'user' ? 'You' : 'Bot'}:</strong> ${message}</div>`
+            );
+            $('#chat-container').scrollTop($('#chat-container')[0].scrollHeight);
+        }
+
+        // Event listener for send button
+        $('#send-message').click(function() {
+            const userMessage = $('#user-message').val().trim();
+            if (!userMessage) {
+                appendMessage('bot', 'Please enter a message.');
+                return;
+            }
+
+            appendMessage('user', userMessage);
+            $('#user-message').val(''); // Clear input
+
+            // Send user message to the backend
+            $.ajax({
+                url: '/chatbot/',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ message: userMessage }),
+                success: function(data) {
+                    if (data.reply) {
+                        appendMessage('bot', data.reply);
+                    } else {
+                        appendMessage('bot', 'An unexpected error occurred.');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    appendMessage('bot', `Error: ${xhr.responseJSON?.error || 'Unknown error occurred'}`);
+                }
+            });
+        });
+
+        // Allow pressing "Enter" to send message
+        $('#user-message').keypress(function(event) {
+            if (event.which === 13) { // Enter key
+                $('#send-message').click();
+            }
+        });
+    });
+</script>
+
+{% endblock %}

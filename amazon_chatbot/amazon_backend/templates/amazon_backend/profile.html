@@ -1,0 +1,114 @@
+{% extends 'amazon_backend/base.html' %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>Profile Information</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="first_name" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="first_name" name="first_name" 
+                                   value="{{ user.first_name }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="last_name" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="last_name" name="last_name" 
+                                   value="{{ user.last_name }}">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" 
+                               value="{{ user.email }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Phone</label>
+                        <input type="tel" class="form-control" id="phone" name="phone" 
+                               value="{{ profile.phone }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Address</label>
+                        <textarea class="form-control" id="address" name="address" 
+                                rows="3">{{ profile.address }}</textarea>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="city" class="form-label">City</label>
+                            <input type="text" class="form-control" id="city" name="city" 
+                                   value="{{ profile.city }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="state" class="form-label">State</label>
+                            <input type="text" class="form-control" id="state" name="state" 
+                                   value="{{ profile.state }}">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="zip_code" class="form-label">ZIP</label>
+                            <input type="text" class="form-control" id="zip_code" name="zip_code" 
+                                   value="{{ profile.zip_code }}">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Update Profile</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>VIP Subscription</h4>
+            </div>
+            <div class="card-body">
+                {% if subscription %}
+                    <p><strong>Status:</strong> {{ subscription.status|title }}</p>
+                    <p><strong>Start Date:</strong> {{ subscription.start_date|date }}</p>
+                    <p><strong>End Date:</strong> {{ subscription.end_date|date }}</p>
+                    <p><strong>Next Payment:</strong> {{ subscription.next_payment_date|date }}</p>
+                    
+                    {% if subscription.status == 'active' %}
+                        <form action="{% url 'amazon_backend:cancel_subscription' %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">Cancel Subscription</button>
+                        </form>
+                    {% elif subscription.status == 'cancelled' %}
+                        <a href="{% url 'amazon_backend:subscribe' %}" class="btn btn-success">Resubscribe</a>
+                    {% endif %}
+                {% else %}
+                    <p>You are not currently subscribed to our VIP service.</p>
+                    <a href="{% url 'amazon_backend:subscribe' %}" class="btn btn-success">Subscribe Now</a>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h4>VIP Benefits</h4>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    {% for benefit in benefits %}
+                    <li class="mb-2">
+                        <h6>{{ benefit.title }}</h6>
+                        <p class="text-muted">{{ benefit.description }}</p>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
